@@ -8,16 +8,16 @@ if (!MONGODB_URI) {
 
 let cached = global.mongoose || { conn: null, promise: null };
 
-export async function connectToDatabase() {
-  if (cached.conn) return cached.conn;
-
-  if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }).then((mongoose) => mongoose);
+export const connectToDatabase = async () => {
+  if (mongoose.connection.readyState === 1) {
+    console.log("Already connected to MongoDB");
+    return;
   }
 
-  cached.conn = await cached.promise;
-  return cached.conn;
-}
+  try {
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log("Connected to MongoDB");
+  } catch (error) {
+    console.error("MongoDB connection error:", error);
+  }
+};
